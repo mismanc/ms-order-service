@@ -82,7 +82,7 @@ public class SodaOrderServiceImpl implements SodaOrderService {
     private SodaOrder getOrder(UUID customerId, UUID orderId) {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
         if (customerOptional.isPresent()) {
-            return sodaOrderRepository.findByIdAndCustomer_Id(orderId, customerId).orElseThrow(() -> new RuntimeException("Beer Order Not Found"));
+            return sodaOrderRepository.findByIdAndCustomer_Id(orderId, customerId).orElseThrow(() -> new RuntimeException("Soda Order Not Found"));
         }
         throw new RuntimeException("Customer Not Found");
     }

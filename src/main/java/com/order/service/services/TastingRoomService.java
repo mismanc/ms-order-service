@@ -46,10 +46,10 @@ public class TastingRoomService {
     }
 
     private void doPlaceOrder(Customer customer) {
-        String beerToOrder = getRandomSodaUpc();
+        String sodaToOrder = getRandomSodaUpc();
 
         SodaOrderLineDto sodaOrderLine = SodaOrderLineDto.builder()
-                .upc(beerToOrder)
+                .upc(sodaToOrder)
                 .orderQuantity(new Random().nextInt(6)) //todo externalize value to property
                 .build();
 
