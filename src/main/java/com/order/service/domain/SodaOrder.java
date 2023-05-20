@@ -19,7 +19,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Entity
-public class BeerOrder extends BaseEntity{
+public class SodaOrder extends BaseEntity{
 
 
     private String customerRef;
@@ -29,18 +29,18 @@ public class BeerOrder extends BaseEntity{
     @ManyToOne
     private Customer customer;
 
-    @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sodaOrder", cascade = CascadeType.ALL)
     @Fetch(FetchMode.JOIN)
-    private Set<BeerOrderLine> beerOrderLines;
+    private Set<SodaOrderLine> sodaOrderLines;
 
     @Builder
-    public BeerOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, Customer customer,
-                     Set<BeerOrderLine> beerOrderLines, OrderStatusEnum orderStatus,
+    public SodaOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, Customer customer,
+                     Set<SodaOrderLine> sodaOrderLines, OrderStatusEnum orderStatus,
                      String orderStatusCallbackUrl) {
         super(id, version, createdDate, lastModifiedDate);
         this.customerRef = customerRef;
         this.customer = customer;
-        this.beerOrderLines = beerOrderLines;
+        this.sodaOrderLines = sodaOrderLines;
         this.orderStatus = orderStatus;
         this.orderStatusCallbackUrl = orderStatusCallbackUrl;
     }

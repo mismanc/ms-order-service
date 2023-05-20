@@ -1,7 +1,7 @@
 package com.order.service.web.controllers;
 
-import com.order.service.services.BeerOrderService;
-import com.order.service.web.model.BeerOrderDto;
+import com.order.service.services.SodaOrderService;
+import com.order.service.web.model.SodaOrderDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,37 +15,37 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/customers/{customerId}")
-public class BeerController {
+public class SodaController {
 
-    private final BeerOrderService beerOrderService;
+    private final SodaOrderService sodaOrderService;
 
 
-    public BeerController(BeerOrderService beerOrderService) {
-        this.beerOrderService = beerOrderService;
+    public SodaController(SodaOrderService sodaOrderService) {
+        this.sodaOrderService = sodaOrderService;
     }
 
     @GetMapping("/orders")
-    public Page<BeerOrderDto> listOrders(@PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
+    public Page<SodaOrderDto> listOrders(@PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
                                          @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder,
                                          @PathVariable UUID customerId) {
 
-        return beerOrderService.listOrders(customerId, pageable);
+        return sodaOrderService.listOrders(customerId, pageable);
     }
 
     @GetMapping("/orders/{orderId}")
-    public BeerOrderDto getOrder(@PathVariable UUID customerId, @PathVariable UUID orderId){
-        return beerOrderService.getOrderById(customerId, orderId);
+    public SodaOrderDto getOrder(@PathVariable UUID customerId, @PathVariable UUID orderId){
+        return sodaOrderService.getOrderById(customerId, orderId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BeerOrderDto placeOrder(@PathVariable UUID customerId, @RequestBody BeerOrderDto beerOrderDto){
-        return beerOrderService.placeOrder(customerId, beerOrderDto);
+    public SodaOrderDto placeOrder(@PathVariable UUID customerId, @RequestBody SodaOrderDto sodaOrderDto){
+        return sodaOrderService.placeOrder(customerId, sodaOrderDto);
     }
 
     @PutMapping("/orders/{orderId}/pickup")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void pickupOrder(@PathVariable UUID customerId, @PathVariable UUID orderId){
-        beerOrderService.pickupOrder(customerId, orderId);
+        sodaOrderService.pickupOrder(customerId, orderId);
     }
 }

@@ -1,10 +1,10 @@
 package com.order.service.services;
 
-import com.order.service.bootstrap.BeerOrderBootStrap;
+import com.order.service.bootstrap.SodaOrderBootStrap;
 import com.order.service.domain.Customer;
 import com.order.service.repositories.CustomerRepository;
-import com.order.service.web.model.BeerOrderDto;
-import com.order.service.web.model.BeerOrderLineDto;
+import com.order.service.web.model.SodaOrderDto;
+import com.order.service.web.model.SodaOrderLineDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,25 +19,25 @@ import java.util.UUID;
 @Service
 public class TastingRoomService {
 
-    private final BeerOrderService beerOrderService;
+    private final SodaOrderService sodaOrderService;
     private final CustomerRepository customerRepository;
 
-    private final List<String> beerUpcs = new ArrayList<>(3);
+    private final List<String> sodaUpcs = new ArrayList<>(3);
 
-    public TastingRoomService(BeerOrderService beerOrderService, CustomerRepository customerRepository) {
-        this.beerOrderService = beerOrderService;
+    public TastingRoomService(SodaOrderService sodaOrderService, CustomerRepository customerRepository) {
+        this.sodaOrderService = sodaOrderService;
         this.customerRepository = customerRepository;
 
-        beerUpcs.add(BeerOrderBootStrap.BEER_1_UPC);
-        beerUpcs.add(BeerOrderBootStrap.BEER_2_UPC);
-        beerUpcs.add(BeerOrderBootStrap.BEER_3_UPC);
+        sodaUpcs.add(SodaOrderBootStrap.SODA_1_UPC);
+        sodaUpcs.add(SodaOrderBootStrap.SODA_2_UPC);
+        sodaUpcs.add(SodaOrderBootStrap.SODA_3_UPC);
     }
 
 
     @Transactional
     @Scheduled(fixedRate = 4000)
     public void placeTastingRoomOrder(){
-        List<Customer> customerList = customerRepository.findAllByCustomerNameLike(BeerOrderBootStrap.TASTING_ROOM);
+        List<Customer> customerList = customerRepository.findAllByCustomerNameLike(SodaOrderBootStrap.TASTING_ROOM);
         if (customerList.size() == 1){ //should be just one
             doPlaceOrder(customerList.get(0));
         } else {
@@ -46,26 +46,26 @@ public class TastingRoomService {
     }
 
     private void doPlaceOrder(Customer customer) {
-        String beerToOrder = getRandomBeerUpc();
+        String beerToOrder = getRandomSodaUpc();
 
-        BeerOrderLineDto beerOrderLine = BeerOrderLineDto.builder()
+        SodaOrderLineDto sodaOrderLine = SodaOrderLineDto.builder()
                 .upc(beerToOrder)
                 .orderQuantity(new Random().nextInt(6)) //todo externalize value to property
                 .build();
 
-        List<BeerOrderLineDto> beerOrderLineSet = new ArrayList<>();
-        beerOrderLineSet.add(beerOrderLine);
+        List<SodaOrderLineDto> sodaOrderLineSet = new ArrayList<>();
+        sodaOrderLineSet.add(sodaOrderLine);
 
-        BeerOrderDto beerOrder = BeerOrderDto.builder()
+        SodaOrderDto sodaOrder = SodaOrderDto.builder()
                 .customerId(customer.getId())
                 .customerRef(UUID.randomUUID().toString())
-                .beerOrderLines(beerOrderLineSet)
+                .sodaOrderLines(sodaOrderLineSet)
                 .build();
 
-        BeerOrderDto savedOrder = beerOrderService.placeOrder(customer.getId(), beerOrder);
+        SodaOrderDto savedOrder = sodaOrderService.placeOrder(customer.getId(), sodaOrder);
     }
 
-    private String getRandomBeerUpc() {
-        return beerUpcs.get(new Random().nextInt(beerUpcs.size()));
+    private String getRandomSodaUpc() {
+        return sodaUpcs.get(new Random().nextInt(sodaUpcs.size()));
     }
 }

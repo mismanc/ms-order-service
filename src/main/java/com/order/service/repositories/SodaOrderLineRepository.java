@@ -17,10 +17,10 @@
 
 package com.order.service.repositories;
 
-import com.order.service.domain.BeerOrderLine;
+import com.order.service.domain.SodaOrderLine;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.UUID;
 
-public interface BeerOrderLineRepository extends PagingAndSortingRepository<BeerOrderLine, UUID> {
+public interface SodaOrderLineRepository extends PagingAndSortingRepository<SodaOrderLine, UUID> {
 }

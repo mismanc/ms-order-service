@@ -17,8 +17,7 @@
 package com.order.service.repositories;
 
 
-import com.order.service.domain.BeerOrder;
-import com.order.service.domain.Customer;
+import com.order.service.domain.SodaOrder;
 import com.order.service.domain.OrderStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,14 +33,14 @@ import java.util.UUID;
 /**
  * Created by jt on 2019-01-26.
  */
-public interface BeerOrderRepository  extends JpaRepository<BeerOrder, UUID> {
+public interface SodaOrderRepository extends JpaRepository<SodaOrder, UUID> {
 
-    Page<BeerOrder> findAllByCustomer_Id(UUID customerId, Pageable pageable);
+    Page<SodaOrder> findAllByCustomer_Id(UUID customerId, Pageable pageable);
 
-    Optional<BeerOrder> findByIdAndCustomer_Id(UUID id, UUID customerId);
+    Optional<SodaOrder> findByIdAndCustomer_Id(UUID id, UUID customerId);
 
-    List<BeerOrder> findAllByOrderStatus(OrderStatusEnum orderStatusEnum);
+    List<SodaOrder> findAllByOrderStatus(OrderStatusEnum orderStatusEnum);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    BeerOrder findOneById(UUID id);
+    SodaOrder findOneById(UUID id);
 }

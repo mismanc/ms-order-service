@@ -11,20 +11,20 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class BeerOrderLineDto extends BaseItem{
+public class SodaOrderLineDto extends BaseItem{
 
     private String upc;
-    private String beerName;
-    private UUID beerId;
+    private String sodaName;
+    private UUID sodaId;
     private Integer orderQuantity = 0;
 
     @Builder
-    public BeerOrderLineDto(UUID id, Integer version, OffsetDateTime createdDate, OffsetDateTime lastModifiedDate,
-                            String upc, String beerName, UUID beerId, Integer orderQuantity) {
+    public SodaOrderLineDto(UUID id, Integer version, OffsetDateTime createdDate, OffsetDateTime lastModifiedDate,
+                            String upc, String sodaName, UUID sodaId, Integer orderQuantity) {
         super(id, version, createdDate, lastModifiedDate);
         this.upc = upc;
-        this.beerName = beerName;
-        this.beerId = beerId;
+        this.sodaName = sodaName;
+        this.sodaId = sodaId;
         this.orderQuantity = orderQuantity;
     }
 

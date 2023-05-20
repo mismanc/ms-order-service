@@ -14,22 +14,22 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Entity
-public class BeerOrderLine extends BaseEntity{
+public class SodaOrderLine extends BaseEntity{
 
     @ManyToOne
-    private BeerOrder beerOrder;
+    private SodaOrder sodaOrder;
 
-    private UUID beerId;
+    private UUID sodaId;
     private Integer orderQuantity = 0;
     private Integer quantityAllocated = 0;
 
     @Builder
-    public BeerOrderLine(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate,
-                         BeerOrder beerOrder, UUID beerId, Integer orderQuantity,
+    public SodaOrderLine(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate,
+                         SodaOrder sodaOrder, UUID sodaId, Integer orderQuantity,
                          Integer quantityAllocated) {
         super(id, version, createdDate, lastModifiedDate);
-        this.beerOrder = beerOrder;
-        this.beerId = beerId;
+        this.sodaOrder = sodaOrder;
+        this.sodaId = sodaId;
         this.orderQuantity = orderQuantity;
         this.quantityAllocated = quantityAllocated;
     }

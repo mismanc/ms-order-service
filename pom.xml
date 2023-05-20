@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.microservice</groupId>
-    <artifactId>mssc-beer-order-service</artifactId>
+    <artifactId>ms-soda-order-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mssc-beer-order-service</name>
-    <description>mssc-beer-order-service</description>
+    <name>ms-soda-order-service</name>
+    <description>ms-soda-order-service</description>
     <properties>
         <java.version>11</java.version>
     </properties>
