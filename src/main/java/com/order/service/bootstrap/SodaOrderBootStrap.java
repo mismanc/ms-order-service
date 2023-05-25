@@ -13,9 +13,9 @@ import java.util.UUID;
 public class SodaOrderBootStrap implements CommandLineRunner {
 
     public static final String TASTING_ROOM = "Tasting Room";
-    public static final String SODA_1_UPC = "0631234200036";
-    public static final String SODA_2_UPC = "0631234300019";
-    public static final String SODA_3_UPC = "0083783375213";
+    public static final String SODA_1_UPC = "3370100000";
+    public static final String SODA_2_UPC = "3370100001";
+    public static final String SODA_3_UPC = "3370100002";
 
     private final CustomerRepository customerRepository;
 
@@ -26,10 +26,11 @@ public class SodaOrderBootStrap implements CommandLineRunner {
 
     private void loadCustomerData() {
         if (customerRepository.count() == 0) {
-            customerRepository.save(Customer.builder()
+            Customer customer = customerRepository.save(Customer.builder()
                     .customerName(TASTING_ROOM)
                     .apiKey(UUID.randomUUID())
                     .build());
+            System.out.println("Customer id: " + customer.getId().toString());
         }
     }
 
