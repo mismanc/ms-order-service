@@ -15,4 +15,12 @@
     <name>ms-soda-order-service</name>
     <description>ms-soda-order-service</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
 </project>

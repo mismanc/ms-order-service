@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    username: application
+    password: '123app*.'
+    url: jdbc:postgresql://localhost:5432/sodaorder
+  jpa:
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+soda:
+  order:
+    service-host=http://localhost:8080
+server:
+  port: 8081
+logging:
+  level:
+    com:
+      order: debug
