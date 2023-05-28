@@ -3,16 +3,25 @@ spring:
     username: application
     password: '123app*.'
     url: jdbc:postgresql://localhost:5432/sodaorder
+    hikari:
+      maximum-pool-size: 7
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 1792
+        useServerPrepStmts: true
   jpa:
     database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 soda:
   order:
-    service-host=http://localhost:8080
+    service-host: http://localhost:8080
 server:
   port: 8081
 logging:
