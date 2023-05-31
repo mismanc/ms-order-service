@@ -1,4 +1,7 @@
 spring:
+  artemis:
+    password: simetraehcapa
+    user: artemis
   datasource:
     username: application
     password: '123app*.'
