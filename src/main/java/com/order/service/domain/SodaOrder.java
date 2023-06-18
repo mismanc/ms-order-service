@@ -23,7 +23,7 @@ public class SodaOrder extends BaseEntity{
 
 
     private String customerRef;
-    private OrderStatusEnum orderStatus = OrderStatusEnum.NEW;
+    private SodaOrderStatusEnum orderStatus = SodaOrderStatusEnum.NEW;
     private String orderStatusCallbackUrl;
 
     @ManyToOne
@@ -35,7 +35,7 @@ public class SodaOrder extends BaseEntity{
 
     @Builder
     public SodaOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, Customer customer,
-                     Set<SodaOrderLine> sodaOrderLines, OrderStatusEnum orderStatus,
+                     Set<SodaOrderLine> sodaOrderLines, SodaOrderStatusEnum orderStatus,
                      String orderStatusCallbackUrl) {
         super(id, version, createdDate, lastModifiedDate);
         this.customerRef = customerRef;

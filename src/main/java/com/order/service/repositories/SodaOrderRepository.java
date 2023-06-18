@@ -18,7 +18,7 @@ package com.order.service.repositories;
 
 
 import com.order.service.domain.SodaOrder;
-import com.order.service.domain.OrderStatusEnum;
+import com.order.service.domain.SodaOrderStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,7 +39,7 @@ public interface SodaOrderRepository extends JpaRepository<SodaOrder, UUID> {
 
     Optional<SodaOrder> findByIdAndCustomer_Id(UUID id, UUID customerId);
 
-    List<SodaOrder> findAllByOrderStatus(OrderStatusEnum orderStatusEnum);
+    List<SodaOrder> findAllByOrderStatus(SodaOrderStatusEnum sodaOrderStatusEnum);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     SodaOrder findOneById(UUID id);

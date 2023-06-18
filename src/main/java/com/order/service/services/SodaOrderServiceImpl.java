@@ -1,10 +1,10 @@
 package com.order.service.services;
 
-import com.order.service.domain.SodaOrder;
 import com.order.service.domain.Customer;
-import com.order.service.domain.OrderStatusEnum;
-import com.order.service.repositories.SodaOrderRepository;
+import com.order.service.domain.SodaOrder;
+import com.order.service.domain.SodaOrderStatusEnum;
 import com.order.service.repositories.CustomerRepository;
+import com.order.service.repositories.SodaOrderRepository;
 import com.order.service.web.mappers.SodaOrderMapper;
 import com.order.service.web.model.SodaOrderDto;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class SodaOrderServiceImpl implements SodaOrderService {
             SodaOrder sodaOrder = sodaOrderMapper.dtoToSodaOrder(sodaOrderDto);
             sodaOrder.setId(null);
             sodaOrder.setCustomer(customerOptional.get());
-            sodaOrder.setOrderStatus(OrderStatusEnum.NEW);
+            sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
             sodaOrder.getSodaOrderLines().forEach(line -> line.setSodaOrder(sodaOrder));
             SodaOrder saved = sodaOrderRepository.save(sodaOrder);
             log.debug("Save Soda Order: " + saved.getId().toString());
@@ -74,7 +74,7 @@ public class SodaOrderServiceImpl implements SodaOrderService {
     @Override
     public void pickupOrder(UUID customerId, UUID orderId) {
         SodaOrder sodaOrder = getOrder(customerId, orderId);
-        sodaOrder.setOrderStatus(OrderStatusEnum.PICKED_UP);
+        sodaOrder.setOrderStatus(SodaOrderStatusEnum.PICKED_UP);
 
         sodaOrderRepository.save(sodaOrder);
     }
