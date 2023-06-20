@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
+import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 
 import java.util.EnumSet;
 
@@ -22,5 +23,15 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
                 .end(SodaOrderStatusEnum.DELIVERY_EXCEPTION)
                 .end(SodaOrderStatusEnum.VALIDATION_EXCEPTION)
                 .end(SodaOrderStatusEnum.ALLOCATION_EXCEPTION);
+    }
+
+    @Override
+    public void configure(StateMachineTransitionConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> transitions) throws Exception {
+        transitions.withExternal()
+                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.NEW).event(SodaOrderEventEnum.VALIDATE_ORDER)
+                .and().withExternal()
+                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATED).event(SodaOrderEventEnum.VALIDATION_PASSED)
+                .and().withExternal()
+                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATION_EXCEPTION).event(SodaOrderEventEnum.VALIDATION_FAILED);
     }
 }
