@@ -1,12 +1,12 @@
 package com.order.service.services;
 
+import com.ms.model.SodaOrderDto;
 import com.order.service.domain.Customer;
 import com.order.service.domain.SodaOrder;
 import com.order.service.domain.SodaOrderStatusEnum;
 import com.order.service.repositories.CustomerRepository;
 import com.order.service.repositories.SodaOrderRepository;
 import com.order.service.web.mappers.SodaOrderMapper;
-import com.order.service.web.model.SodaOrderDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;

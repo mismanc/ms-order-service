@@ -1,6 +1,6 @@
 package com.order.service.services;
 
-import com.order.service.web.model.SodaOrderDto;
+import com.ms.model.SodaOrderDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

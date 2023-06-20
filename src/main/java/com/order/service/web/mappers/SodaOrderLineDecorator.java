@@ -1,9 +1,9 @@
 package com.order.service.web.mappers;
 
+import com.ms.model.SodaDto;
+import com.ms.model.SodaOrderLineDto;
 import com.order.service.domain.SodaOrderLine;
 import com.order.service.services.soda.SodaService;
-import com.order.service.web.model.SodaDto;
-import com.order.service.web.model.SodaOrderLineDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 

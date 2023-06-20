@@ -1,10 +1,10 @@
 package com.order.service.services;
 
+import com.ms.model.SodaOrderDto;
+import com.ms.model.SodaOrderLineDto;
 import com.order.service.bootstrap.SodaOrderBootStrap;
 import com.order.service.domain.Customer;
 import com.order.service.repositories.CustomerRepository;
-import com.order.service.web.model.SodaOrderDto;
-import com.order.service.web.model.SodaOrderLineDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

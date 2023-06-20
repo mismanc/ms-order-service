@@ -1,7 +1,7 @@
 package com.order.service.web.mappers;
 
+import com.ms.model.SodaOrderDto;
 import com.order.service.domain.SodaOrder;
-import com.order.service.web.model.SodaOrderDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

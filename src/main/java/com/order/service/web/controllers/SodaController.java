@@ -1,7 +1,7 @@
 package com.order.service.web.controllers;
 
+import com.ms.model.SodaOrderDto;
 import com.order.service.services.SodaOrderService;
-import com.order.service.web.model.SodaOrderDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
