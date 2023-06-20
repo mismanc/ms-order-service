@@ -28,7 +28,7 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
     @Override
     public void configure(StateMachineTransitionConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> transitions) throws Exception {
         transitions.withExternal()
-                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.NEW).event(SodaOrderEventEnum.VALIDATE_ORDER)
+                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATION_PENDING).event(SodaOrderEventEnum.VALIDATE_ORDER)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATED).event(SodaOrderEventEnum.VALIDATION_PASSED)
                 .and().withExternal()
