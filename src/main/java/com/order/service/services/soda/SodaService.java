@@ -1,6 +1,6 @@
 package com.order.service.services.soda;
 
-import com.ms.model.SodaDto;
+import com.ms.soda.model.SodaDto;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -1,6 +1,6 @@
 package com.order.service.services;
 
-import com.ms.model.SodaOrderDto;
+import com.ms.soda.model.SodaOrderDto;
 import com.order.service.domain.Customer;
 import com.order.service.domain.SodaOrder;
 import com.order.service.domain.SodaOrderStatusEnum;

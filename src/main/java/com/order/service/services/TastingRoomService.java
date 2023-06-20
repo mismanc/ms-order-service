@@ -1,7 +1,7 @@
 package com.order.service.services;
 
-import com.ms.model.SodaOrderDto;
-import com.ms.model.SodaOrderLineDto;
+import com.ms.soda.model.SodaOrderDto;
+import com.ms.soda.model.SodaOrderLineDto;
 import com.order.service.bootstrap.SodaOrderBootStrap;
 import com.order.service.domain.Customer;
 import com.order.service.repositories.CustomerRepository;

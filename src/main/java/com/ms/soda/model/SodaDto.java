@@ -1,4 +1,4 @@
-package com.ms.model;
+package com.ms.soda.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
