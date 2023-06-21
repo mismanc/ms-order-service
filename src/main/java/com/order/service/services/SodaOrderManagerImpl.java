@@ -14,6 +14,8 @@ import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Service
 public class SodaOrderManagerImpl implements SodaOrderManager {
@@ -34,7 +36,13 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         return savedSoadOrder;
     }
 
-    private void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum){
+    @Override
+    public void processValidationResult(UUID id, Boolean isValid) {
+        SodaOrder sodaOrder = sodaOrderRepository.findOneById(id);
+        sendSodaOrderEvent(sodaOrder, isValid ? SodaOrderEventEnum.VALIDATION_PASSED : SodaOrderEventEnum.VALIDATION_FAILED);
+    }
+
+    private void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum) {
         StateMachine<SodaOrderStatusEnum, SodaOrderEventEnum> sm = build(sodaOrder);
         Message<SodaOrderEventEnum> message = MessageBuilder.withPayload(sodaOrderEventEnum)
                 .setHeader(ORDER_ID_HEADER, sodaOrder.getId().toString())
@@ -42,10 +50,10 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         sm.sendEvent(message);
     }
 
-    private StateMachine<SodaOrderStatusEnum, SodaOrderEventEnum> build(SodaOrder sodaOrder){
+    private StateMachine<SodaOrderStatusEnum, SodaOrderEventEnum> build(SodaOrder sodaOrder) {
         StateMachine<SodaOrderStatusEnum, SodaOrderEventEnum> sm = stateMachineFactory.getStateMachine(sodaOrder.getId());
         sm.stop();
-        sm.getStateMachineAccessor().doWithAllRegions(sma-> {
+        sm.getStateMachineAccessor().doWithAllRegions(sma -> {
             sma.addStateMachineInterceptor(smInterceptor);
             sma.resetStateMachine(new DefaultStateMachineContext<>(sodaOrder.getOrderStatus(), null, null, null));
         });
