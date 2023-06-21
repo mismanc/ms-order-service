@@ -2,6 +2,8 @@ package com.order.service.sm;
 
 import com.order.service.domain.SodaOrderEventEnum;
 import com.order.service.domain.SodaOrderStatusEnum;
+import com.order.service.sm.actions.ValidateOrderAction;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
@@ -12,7 +14,10 @@ import java.util.EnumSet;
 
 @Configuration
 @EnableStateMachineFactory
+@RequiredArgsConstructor
 public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<SodaOrderStatusEnum, SodaOrderEventEnum> {
+
+    private final ValidateOrderAction validateOrderAction;
 
     @Override
     public void configure(StateMachineStateConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> states) throws Exception {
@@ -28,7 +33,8 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
     @Override
     public void configure(StateMachineTransitionConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> transitions) throws Exception {
         transitions.withExternal()
-                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATION_PENDING).event(SodaOrderEventEnum.VALIDATE_ORDER)
+                .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATION_PENDING)
+                .event(SodaOrderEventEnum.VALIDATE_ORDER).action(validateOrderAction)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.NEW).target(SodaOrderStatusEnum.VALIDATED).event(SodaOrderEventEnum.VALIDATION_PASSED)
                 .and().withExternal()
