@@ -39,7 +39,13 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
     @Override
     public void processValidationResult(UUID id, Boolean isValid) {
         SodaOrder sodaOrder = sodaOrderRepository.findOneById(id);
-        sendSodaOrderEvent(sodaOrder, isValid ? SodaOrderEventEnum.VALIDATION_PASSED : SodaOrderEventEnum.VALIDATION_FAILED);
+        if (isValid) {
+            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_PASSED);
+            SodaOrder validated = sodaOrderRepository.findOneById(id);
+            sendSodaOrderEvent(validated, SodaOrderEventEnum.ALLOCATE_ORDER);
+        } else {
+            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_FAILED);
+        }
     }
 
     private void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum) {
