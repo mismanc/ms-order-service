@@ -1,5 +1,6 @@
 package com.order.service.services;
 
+import com.ms.soda.model.SodaOrderDto;
 import com.order.service.domain.SodaOrder;
 import com.order.service.domain.SodaOrderEventEnum;
 import com.order.service.domain.SodaOrderStatusEnum;
@@ -46,6 +47,38 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         } else {
             sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_FAILED);
         }
+    }
+
+    @Override
+    public void sodaOrderAllocationPassed(SodaOrderDto sodaOrderDto) {
+        SodaOrder sodaOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
+        sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_SUCCESS);
+        updateAllocatedQty(sodaOrderDto);
+    }
+
+    @Override
+    public void sodaOrderPendingInventory(SodaOrderDto sodaOrderDto) {
+        SodaOrder sodaOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
+        sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_NO_INVENTORY);
+        updateAllocatedQty(sodaOrderDto);
+    }
+
+    private void updateAllocatedQty(SodaOrderDto sodaOrderDto) {
+        SodaOrder allocatedOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
+        allocatedOrder.getSodaOrderLines().forEach(orderLine -> {
+            sodaOrderDto.getSodaOrderLines().forEach(orderLineDto -> {
+                if (orderLine.getId().equals(orderLineDto.getId())) {
+                    orderLine.setQuantityAllocated(orderLineDto.getQuantityAllocated());
+                }
+            });
+        });
+        sodaOrderRepository.saveAndFlush(allocatedOrder);
+    }
+
+    @Override
+    public void sodaOrderAllocationFailed(SodaOrderDto sodaOrderDto) {
+        SodaOrder sodaOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
+        sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_FAILED);
     }
 
     private void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum) {

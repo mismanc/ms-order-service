@@ -31,6 +31,7 @@ public class SodaOrderLineDto {
     private String sodaStyle;
     private UUID sodaId;
     private Integer orderQuantity = 0;
+    private Integer quantityAllocated;
     private BigDecimal price;
 
 }
