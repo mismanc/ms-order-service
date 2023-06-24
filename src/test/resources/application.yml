@@ -1,3 +1,8 @@
 soda:
   order:
     service-host: http://localhost:8083
+
+logging:
+  level:
+    com:
+      order: debug

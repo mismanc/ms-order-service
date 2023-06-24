@@ -2,6 +2,7 @@ package com.order.service.services;
 
 import com.ms.soda.model.SodaOrderDto;
 import com.order.service.domain.SodaOrder;
+import com.order.service.domain.SodaOrderEventEnum;
 
 import java.util.UUID;
 
@@ -19,4 +20,5 @@ public interface SodaOrderManager {
 
     void sodaOrderAllocationFailed(SodaOrderDto sodaOrderDto);
 
+    void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum);
 }

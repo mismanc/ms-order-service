@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = {WireMockInitializer.class})
@@ -75,7 +76,12 @@ public class SodaOrderManagerIT {
 
         SodaOrder sodaOrder = createSodaOrder();
         SodaOrder savedSodaOrder = sodaOrderManager.newSodaOrder(sodaOrder);
-        Thread.sleep(5000);
+        await().untilAsserted(()->{
+            Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderOptional.isPresent());
+            SodaOrder afterOrder = sodaOrderOptional.get();
+            assertEquals(SodaOrderStatusEnum.ALLOCATION_PENDING, afterOrder.getOrderStatus());
+        });
         assertNotNull(savedSodaOrder);
         assertEquals(SodaOrderStatusEnum.ALLOCATED, savedSodaOrder.getOrderStatus());
     }

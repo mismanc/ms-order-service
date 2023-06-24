@@ -22,6 +22,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class SodaOrderManagerImpl implements SodaOrderManager {
 
     public static final String ORDER_ID_HEADER = "ORDER_ID";
@@ -30,7 +31,6 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
     private final SodaOrderRepository sodaOrderRepository;
     private final SodaSMInterceptor smInterceptor;
 
-    @Transactional
     @Override
     public SodaOrder newSodaOrder(SodaOrder sodaOrder) {
         sodaOrder.setId(null);
@@ -40,33 +40,29 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         return savedSoadOrder;
     }
 
-    @Transactional
     @Override
     public SodaOrder saveSodaOrder(SodaOrder sodaOrder) {
         sodaOrder.setId(null);
         sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
-        SodaOrder savedSoadOrder = sodaOrderRepository.save(sodaOrder);
+        SodaOrder savedSoadOrder = sodaOrderRepository.saveAndFlush(sodaOrder);
         return savedSoadOrder;
     }
 
     @Override
-    @Transactional
     public void processValidationResult(UUID id, Boolean isValid) {
         Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(id);
-        if (sodaOrderOptional.isEmpty()) {
-            throw new RuntimeException("Order Not Found");
-        } else {
+        if (sodaOrderOptional.isPresent()) {
             SodaOrder sodaOrder = sodaOrderOptional.get();
             if (isValid) {
                 sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_PASSED);
                 Optional<SodaOrder> validated = sodaOrderRepository.findById(id);
                 if (validated.isPresent())
                     sendSodaOrderEvent(validated.get(), SodaOrderEventEnum.ALLOCATE_ORDER);
-                else throw new RuntimeException("Order Not Found");
+                else log.error("Order Not Found ID : " + id);
             } else {
                 sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_FAILED);
             }
-        }
+        } else log.error("Order Not Found ID : " + id);
     }
 
     @Override
@@ -109,7 +105,8 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         }, () -> log.error("Soda order not found: " + sodaOrderDto.getId()));
     }
 
-    private void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum) {
+    @Override
+    public void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum) {
         StateMachine<SodaOrderStatusEnum, SodaOrderEventEnum> sm = build(sodaOrder);
         Message<SodaOrderEventEnum> message = MessageBuilder.withPayload(sodaOrderEventEnum)
                 .setHeader(ORDER_ID_HEADER, sodaOrder.getId().toString())

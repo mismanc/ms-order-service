@@ -15,6 +15,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -29,11 +30,14 @@ public class ValidateOrderAction implements Action<SodaOrderStatusEnum, SodaOrde
     @Override
     public void execute(StateContext<SodaOrderStatusEnum, SodaOrderEventEnum> stateContext) {
         String orderId = (String) stateContext.getMessage().getHeaders().get(SodaOrderManagerImpl.ORDER_ID_HEADER);
-        SodaOrder sodaOrder = sodaOrderRepository.findOneById(UUID.fromString(orderId));
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(UUID.fromString(orderId));
 
-        jmsTemplate.convertAndSend(JMSConfig.VALIDATE_ORDER_QUEUE, ValidateOrderRequest.builder()
-                .sodaOrderDto(sodaOrderMapper.sodaOrderToDto(sodaOrder)).build());
+        if (sodaOrderOptional.isPresent()) {
+            jmsTemplate.convertAndSend(JMSConfig.VALIDATE_ORDER_QUEUE, ValidateOrderRequest.builder()
+                    .sodaOrderDto(sodaOrderMapper.sodaOrderToDto(sodaOrderOptional.get())).build());
 
-        log.debug("Sent validation request to queue for order id : " + orderId);
+            log.debug("Sent validation request to queue for order id : " + orderId);
+        } else throw new RuntimeException("Soda Order Not Found " + orderId);
+
     }
 }
