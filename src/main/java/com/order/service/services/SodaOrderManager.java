@@ -9,6 +9,8 @@ public interface SodaOrderManager {
 
     SodaOrder newSodaOrder(SodaOrder sodaOrder);
 
+    SodaOrder saveSodaOrder(SodaOrder sodaOrder);
+
     void processValidationResult(UUID id, Boolean isValid);
 
     void sodaOrderAllocationPassed(SodaOrderDto sodaOrderDto);

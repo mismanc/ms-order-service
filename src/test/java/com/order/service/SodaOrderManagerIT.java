@@ -21,14 +21,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = {WireMockInitializer.class})
 @SpringBootTest
@@ -60,7 +56,17 @@ public class SodaOrderManagerIT {
     }
 
     @Test
-    void newToAllocated() throws JsonProcessingException {
+    void createSodaOrderTest() {
+        SodaOrder sodaOrder = createSodaOrder();
+        SodaOrder savedSodaOrder = sodaOrderManager.newSodaOrder(sodaOrder);
+        SodaOrder sodaOrderGet = sodaOrderRepository.findOneById(savedSodaOrder.getId());
+        assertNotNull(sodaOrderGet);
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(savedSodaOrder.getId());
+        assertTrue(sodaOrderOptional.isPresent());
+    }
+
+    @Test
+    void newToAllocated() throws JsonProcessingException, InterruptedException {
         SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
 
         wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
@@ -69,6 +75,7 @@ public class SodaOrderManagerIT {
 
         SodaOrder sodaOrder = createSodaOrder();
         SodaOrder savedSodaOrder = sodaOrderManager.newSodaOrder(sodaOrder);
+        Thread.sleep(5000);
         assertNotNull(savedSodaOrder);
         assertEquals(SodaOrderStatusEnum.ALLOCATED, savedSodaOrder.getOrderStatus());
     }

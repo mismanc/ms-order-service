@@ -7,6 +7,7 @@ import com.order.service.domain.SodaOrderStatusEnum;
 import com.order.service.repositories.SodaOrderRepository;
 import com.order.service.sm.SodaSMInterceptor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
@@ -15,8 +16,10 @@ import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SodaOrderManagerImpl implements SodaOrderManager {
@@ -37,48 +40,73 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         return savedSoadOrder;
     }
 
+    @Transactional
     @Override
+    public SodaOrder saveSodaOrder(SodaOrder sodaOrder) {
+        sodaOrder.setId(null);
+        sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
+        SodaOrder savedSoadOrder = sodaOrderRepository.save(sodaOrder);
+        return savedSoadOrder;
+    }
+
+    @Override
+    @Transactional
     public void processValidationResult(UUID id, Boolean isValid) {
-        SodaOrder sodaOrder = sodaOrderRepository.findOneById(id);
-        if (isValid) {
-            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_PASSED);
-            SodaOrder validated = sodaOrderRepository.findOneById(id);
-            sendSodaOrderEvent(validated, SodaOrderEventEnum.ALLOCATE_ORDER);
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(id);
+        if (sodaOrderOptional.isEmpty()) {
+            throw new RuntimeException("Order Not Found");
         } else {
-            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_FAILED);
+            SodaOrder sodaOrder = sodaOrderOptional.get();
+            if (isValid) {
+                sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_PASSED);
+                Optional<SodaOrder> validated = sodaOrderRepository.findById(id);
+                if (validated.isPresent())
+                    sendSodaOrderEvent(validated.get(), SodaOrderEventEnum.ALLOCATE_ORDER);
+                else throw new RuntimeException("Order Not Found");
+            } else {
+                sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.VALIDATION_FAILED);
+            }
         }
     }
 
     @Override
     public void sodaOrderAllocationPassed(SodaOrderDto sodaOrderDto) {
-        SodaOrder sodaOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
-        sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_SUCCESS);
-        updateAllocatedQty(sodaOrderDto);
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(sodaOrderDto.getId());
+        sodaOrderOptional.ifPresentOrElse(sodaOrder -> {
+            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_SUCCESS);
+            updateAllocatedQty(sodaOrderDto);
+        }, () -> log.error("Soda order not found: " + sodaOrderDto.getId()));
     }
 
     @Override
     public void sodaOrderPendingInventory(SodaOrderDto sodaOrderDto) {
-        SodaOrder sodaOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
-        sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_NO_INVENTORY);
-        updateAllocatedQty(sodaOrderDto);
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(sodaOrderDto.getId());
+        sodaOrderOptional.ifPresentOrElse(sodaOrder -> {
+            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_NO_INVENTORY);
+            updateAllocatedQty(sodaOrderDto);
+        }, () -> log.error("Soda order not found: " + sodaOrderDto.getId()));
     }
 
-    private void updateAllocatedQty(SodaOrderDto sodaOrderDto) {
-        SodaOrder allocatedOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
-        allocatedOrder.getSodaOrderLines().forEach(orderLine -> {
-            sodaOrderDto.getSodaOrderLines().forEach(orderLineDto -> {
-                if (orderLine.getId().equals(orderLineDto.getId())) {
-                    orderLine.setQuantityAllocated(orderLineDto.getQuantityAllocated());
-                }
+    public void updateAllocatedQty(SodaOrderDto sodaOrderDto) {
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(sodaOrderDto.getId());
+        sodaOrderOptional.ifPresentOrElse(allocatedOrder -> {
+            allocatedOrder.getSodaOrderLines().forEach(orderLine -> {
+                sodaOrderDto.getSodaOrderLines().forEach(orderLineDto -> {
+                    if (orderLine.getId().equals(orderLineDto.getId())) {
+                        orderLine.setQuantityAllocated(orderLineDto.getQuantityAllocated());
+                    }
+                });
             });
-        });
-        sodaOrderRepository.saveAndFlush(allocatedOrder);
+            sodaOrderRepository.saveAndFlush(allocatedOrder);
+        }, () -> log.error("Soda order not found: " + sodaOrderDto.getId()));
     }
 
     @Override
     public void sodaOrderAllocationFailed(SodaOrderDto sodaOrderDto) {
-        SodaOrder sodaOrder = sodaOrderRepository.findOneById(sodaOrderDto.getId());
-        sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_FAILED);
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(sodaOrderDto.getId());
+        sodaOrderOptional.ifPresentOrElse(sodaOrder -> {
+            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.ALLOCATION_FAILED);
+        }, () -> log.error("Soda order not found: " + sodaOrderDto.getId()));
     }
 
     private void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum) {
