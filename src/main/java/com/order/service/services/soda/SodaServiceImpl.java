@@ -14,8 +14,8 @@ import java.util.UUID;
 @Service
 public class SodaServiceImpl implements SodaService {
 
-    private final String SODA_PATH_V1 = "/api/v1/soda/";
-    private final String SODA_UPC_PATH_V1 = "/api/v1/soda/upc/";
+    public final static String SODA_PATH_V1 = "/api/v1/soda/";
+    public final static String SODA_UPC_PATH_V1 = "/api/v1/soda/upc/";
     private final RestTemplate restTemplate;
 
     private String serviceHost;

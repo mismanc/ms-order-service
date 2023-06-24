@@ -1,0 +1,3 @@
+soda:
+  order:
+    service-host: http://localhost:8083
