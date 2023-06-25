@@ -33,9 +33,7 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
     @Transactional
     @Override
     public SodaOrder newSodaOrder(SodaOrder sodaOrder) {
-        sodaOrder.setId(null);
-        sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
-        SodaOrder savedSoadOrder = sodaOrderRepository.saveAndFlush(sodaOrder);
+        SodaOrder savedSoadOrder = saveSodaOrder(sodaOrder);
         sendSodaOrderEvent(savedSoadOrder, SodaOrderEventEnum.VALIDATE_ORDER);
         return savedSoadOrder;
     }
@@ -45,8 +43,7 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
     public SodaOrder saveSodaOrder(SodaOrder sodaOrder) {
         sodaOrder.setId(null);
         sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
-        SodaOrder savedSoadOrder = sodaOrderRepository.saveAndFlush(sodaOrder);
-        return savedSoadOrder;
+        return sodaOrderRepository.saveAndFlush(sodaOrder);
     }
 
     @Transactional

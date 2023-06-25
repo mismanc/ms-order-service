@@ -95,7 +95,7 @@ public class SodaOrderManagerIT {
         // assertEquals(SodaOrderStatusEnum.ALLOCATED, savedSodaOrder.getOrderStatus());
     }
 
-    public SodaOrder createSodaOrder() {
+    private SodaOrder createSodaOrder() {
         SodaOrder sodaOrder = SodaOrder.builder().customer(testCustomer).build();
         Set<SodaOrderLine> lines = new HashSet<>();
         lines.add(SodaOrderLine.builder().sodaId(sodaId).upc("123454")
