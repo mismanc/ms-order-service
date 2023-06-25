@@ -1,8 +1,18 @@
 soda:
   order:
     service-host: http://localhost:8083
-
 logging:
   level:
     com:
       order: debug
+server:
+  port: 8081
+spring:
+  jpa:
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: false
+        trace: false

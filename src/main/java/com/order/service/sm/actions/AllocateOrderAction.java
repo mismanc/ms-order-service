@@ -15,6 +15,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -29,11 +30,14 @@ public class AllocateOrderAction implements Action<SodaOrderStatusEnum, SodaOrde
     @Override
     public void execute(StateContext<SodaOrderStatusEnum, SodaOrderEventEnum> stateContext) {
         String orderId = (String) stateContext.getMessage().getHeaders().get(SodaOrderManagerImpl.ORDER_ID_HEADER);
-        SodaOrder sodaOrder = sodaOrderRepository.findOneById(UUID.fromString(orderId));
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(UUID.fromString(orderId));
 
-        jmsTemplate.convertAndSend(JMSConfig.ALLOCATE_ORDER_QUEUE, AllocateOrderRequest.builder()
-                .sodaOrderDto(sodaOrderMapper.sodaOrderToDto(sodaOrder)).build());
+        sodaOrderOptional.ifPresentOrElse(sodaOrder -> {
+            jmsTemplate.convertAndSend(JMSConfig.ALLOCATE_ORDER_QUEUE, AllocateOrderRequest.builder()
+                    .sodaOrderDto(sodaOrderMapper.sodaOrderToDto(sodaOrder)).build());
 
-        log.debug("Sent validation request to queue for order id : " + orderId);
+            log.debug("Sent validation request to queue for order id : " + orderId);
+        }, () -> log.error("Soda Order Not Found " + orderId));
+
     }
 }

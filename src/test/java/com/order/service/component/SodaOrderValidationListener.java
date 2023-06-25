@@ -20,7 +20,7 @@ public class SodaOrderValidationListener {
     @JmsListener(destination = JMSConfig.VALIDATE_ORDER_QUEUE)
     public void list(Message msg){
         ValidateOrderRequest request = (ValidateOrderRequest) msg.getPayload();
-        System.out.println("############ I RAN ############ listener");
+        System.out.println("############ SodaOrderValidationListener ############");
         jmsTemplate.convertAndSend(JMSConfig.VALIDATE_ORDER_RESPONSE_QUEUE, ValidateOrderResult.builder()
                 .isValid(true).id(request.getSodaOrderDto().getId())
                 .build());

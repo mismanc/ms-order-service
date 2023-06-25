@@ -22,7 +22,6 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class SodaOrderManagerImpl implements SodaOrderManager {
 
     public static final String ORDER_ID_HEADER = "ORDER_ID";
@@ -31,15 +30,17 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
     private final SodaOrderRepository sodaOrderRepository;
     private final SodaSMInterceptor smInterceptor;
 
+    @Transactional
     @Override
     public SodaOrder newSodaOrder(SodaOrder sodaOrder) {
         sodaOrder.setId(null);
         sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
-        SodaOrder savedSoadOrder = sodaOrderRepository.save(sodaOrder);
+        SodaOrder savedSoadOrder = sodaOrderRepository.saveAndFlush(sodaOrder);
         sendSodaOrderEvent(savedSoadOrder, SodaOrderEventEnum.VALIDATE_ORDER);
         return savedSoadOrder;
     }
 
+    @Transactional
     @Override
     public SodaOrder saveSodaOrder(SodaOrder sodaOrder) {
         sodaOrder.setId(null);
@@ -48,6 +49,7 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
         return savedSoadOrder;
     }
 
+    @Transactional
     @Override
     public void processValidationResult(UUID id, Boolean isValid) {
         Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(id);

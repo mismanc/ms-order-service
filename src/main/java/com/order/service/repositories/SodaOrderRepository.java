@@ -22,9 +22,7 @@ import com.order.service.domain.SodaOrderStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 
-import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +39,4 @@ public interface SodaOrderRepository extends JpaRepository<SodaOrder, UUID> {
 
     List<SodaOrder> findAllByOrderStatus(SodaOrderStatusEnum sodaOrderStatusEnum);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    SodaOrder findOneById(UUID id);
 }

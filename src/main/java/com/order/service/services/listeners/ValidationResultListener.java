@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class ValidationResultListener {
 
     private final SodaOrderManager sodaOrderManager;
