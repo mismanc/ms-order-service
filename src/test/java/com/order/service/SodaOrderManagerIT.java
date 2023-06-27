@@ -95,6 +95,55 @@ public class SodaOrderManagerIT {
         // assertEquals(SodaOrderStatusEnum.ALLOCATED, savedSodaOrder.getOrderStatus());
     }
 
+    @Test
+    void newToPickup() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.ALLOCATED, afterOrder.getOrderStatus());
+        });
+
+        sodaOrderManager.pickUpOrder(savedSodaOrder.getId());
+
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.PICKED_UP, afterOrder.getOrderStatus());
+        });
+    }
+
+    @Test
+    void testFailedValidation() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        sodaOrder.setCustomerRef("fail-validation");
+
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.VALIDATION_EXCEPTION, afterOrder.getOrderStatus());
+        });
+    }
+
     private SodaOrder createSodaOrder() {
         SodaOrder sodaOrder = SodaOrder.builder().customer(testCustomer).build();
         Set<SodaOrderLine> lines = new HashSet<>();

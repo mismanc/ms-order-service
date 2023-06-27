@@ -7,8 +7,8 @@ import com.order.service.domain.SodaOrderStatusEnum;
 import com.order.service.repositories.CustomerRepository;
 import com.order.service.repositories.SodaOrderRepository;
 import com.order.service.web.mappers.SodaOrderMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SodaOrderServiceImpl implements SodaOrderService {
 
     private final SodaOrderRepository sodaOrderRepository;
@@ -29,14 +30,7 @@ public class SodaOrderServiceImpl implements SodaOrderService {
 
     private final SodaOrderMapper sodaOrderMapper;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
-    public SodaOrderServiceImpl(SodaOrderRepository sodaOrderRepository, CustomerRepository customerRepository, SodaOrderMapper sodaOrderMapper, ApplicationEventPublisher applicationEventPublisher) {
-        this.sodaOrderRepository = sodaOrderRepository;
-        this.customerRepository = customerRepository;
-        this.sodaOrderMapper = sodaOrderMapper;
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+    private final SodaOrderManager sodaOrderManager;
 
     @Override
     public Page<SodaOrderDto> listOrders(UUID customerId, Pageable pageable) {
@@ -59,7 +53,7 @@ public class SodaOrderServiceImpl implements SodaOrderService {
             sodaOrder.setCustomer(customerOptional.get());
             sodaOrder.setOrderStatus(SodaOrderStatusEnum.NEW);
             sodaOrder.getSodaOrderLines().forEach(line -> line.setSodaOrder(sodaOrder));
-            SodaOrder saved = sodaOrderRepository.save(sodaOrder);
+            SodaOrder saved = sodaOrderManager.newSodaOrder(sodaOrder);
             log.debug("Save Soda Order: " + saved.getId().toString());
             return sodaOrderMapper.sodaOrderToDto(saved);
         }
@@ -73,10 +67,7 @@ public class SodaOrderServiceImpl implements SodaOrderService {
 
     @Override
     public void pickupOrder(UUID customerId, UUID orderId) {
-        SodaOrder sodaOrder = getOrder(customerId, orderId);
-        sodaOrder.setOrderStatus(SodaOrderStatusEnum.PICKED_UP);
-
-        sodaOrderRepository.save(sodaOrder);
+        sodaOrderManager.pickUpOrder(orderId);
     }
 
     private SodaOrder getOrder(UUID customerId, UUID orderId) {

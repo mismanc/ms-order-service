@@ -50,6 +50,8 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.ALLOCATION_EXCEPTION).event(SodaOrderEventEnum.ALLOCATION_FAILED)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.PENDING_INVENTORY).event(SodaOrderEventEnum.ALLOCATION_NO_INVENTORY)
+                .and().withExternal()
+                .source(SodaOrderStatusEnum.ALLOCATED).target(SodaOrderStatusEnum.PICKED_UP).event(SodaOrderEventEnum.SODA_ORDER_PICKED_UP)
         ;
     }
 }

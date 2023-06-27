@@ -21,4 +21,6 @@ public interface SodaOrderManager {
     void sodaOrderAllocationFailed(SodaOrderDto sodaOrderDto);
 
     void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum);
+
+    void pickUpOrder(UUID id);
 }
