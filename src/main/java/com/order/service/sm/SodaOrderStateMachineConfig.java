@@ -4,6 +4,7 @@ import com.order.service.domain.SodaOrderEventEnum;
 import com.order.service.domain.SodaOrderStatusEnum;
 import com.order.service.sm.actions.AllocateOrderAction;
 import com.order.service.sm.actions.ValidateOrderAction;
+import com.order.service.sm.actions.ValidationFailureAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
@@ -20,6 +21,7 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
 
     private final ValidateOrderAction validateOrderAction;
     private final AllocateOrderAction allocateOrderAction;
+    private final ValidationFailureAction validationFailureAction;
 
     @Override
     public void configure(StateMachineStateConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> states) throws Exception {
@@ -41,6 +43,7 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
                 .source(SodaOrderStatusEnum.VALIDATION_PENDING).target(SodaOrderStatusEnum.VALIDATED).event(SodaOrderEventEnum.VALIDATION_PASSED)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.VALIDATION_PENDING).target(SodaOrderStatusEnum.VALIDATION_EXCEPTION).event(SodaOrderEventEnum.VALIDATION_FAILED)
+                .action(validationFailureAction)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.VALIDATED).target(SodaOrderStatusEnum.ALLOCATION_PENDING)
                 .event(SodaOrderEventEnum.ALLOCATE_ORDER).action(allocateOrderAction)
