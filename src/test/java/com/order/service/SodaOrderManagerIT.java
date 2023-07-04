@@ -144,6 +144,48 @@ public class SodaOrderManagerIT {
         });
     }
 
+    @Test
+    void testAllocationFailure() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        sodaOrder.setCustomerRef("fail-allocation");
+
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.ALLOCATION_EXCEPTION, afterOrder.getOrderStatus());
+        });
+    }
+
+    @Test
+    void testPartialAllocation() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        sodaOrder.setCustomerRef("partial-allocation");
+
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.PENDING_INVENTORY, afterOrder.getOrderStatus());
+        });
+    }
+
     private SodaOrder createSodaOrder() {
         SodaOrder sodaOrder = SodaOrder.builder().customer(testCustomer).build();
         Set<SodaOrderLine> lines = new HashSet<>();
