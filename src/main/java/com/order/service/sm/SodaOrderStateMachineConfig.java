@@ -3,6 +3,7 @@ package com.order.service.sm;
 import com.order.service.domain.SodaOrderEventEnum;
 import com.order.service.domain.SodaOrderStatusEnum;
 import com.order.service.sm.actions.AllocateOrderAction;
+import com.order.service.sm.actions.AllocationFailureAction;
 import com.order.service.sm.actions.ValidateOrderAction;
 import com.order.service.sm.actions.ValidationFailureAction;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
     private final ValidateOrderAction validateOrderAction;
     private final AllocateOrderAction allocateOrderAction;
     private final ValidationFailureAction validationFailureAction;
+    private final AllocationFailureAction allocationFailureAction;
 
     @Override
     public void configure(StateMachineStateConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> states) throws Exception {
@@ -50,7 +52,8 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.ALLOCATED).event(SodaOrderEventEnum.ALLOCATION_SUCCESS)
                 .and().withExternal()
-                .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.ALLOCATION_EXCEPTION).event(SodaOrderEventEnum.ALLOCATION_FAILED)
+                .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.ALLOCATION_EXCEPTION)
+                .event(SodaOrderEventEnum.ALLOCATION_FAILED).action(allocationFailureAction)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.PENDING_INVENTORY).event(SodaOrderEventEnum.ALLOCATION_NO_INVENTORY)
                 .and().withExternal()

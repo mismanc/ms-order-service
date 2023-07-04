@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.ms.soda.events.AllocationFailureEvent;
 import com.ms.soda.model.SodaDto;
+import com.order.service.config.JMSConfig;
 import com.order.service.domain.*;
 import com.order.service.repositories.CustomerRepository;
 import com.order.service.repositories.SodaOrderRepository;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.HashSet;
@@ -24,8 +27,7 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = {WireMockInitializer.class})
 @SpringBootTest
@@ -45,6 +47,9 @@ public class SodaOrderManagerIT {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    JmsTemplate jmsTemplate;
 
     Customer testCustomer;
 
@@ -163,6 +168,10 @@ public class SodaOrderManagerIT {
             SodaOrder afterOrder = sodaOrderGet.get();
             assertEquals(SodaOrderStatusEnum.ALLOCATION_EXCEPTION, afterOrder.getOrderStatus());
         });
+
+        AllocationFailureEvent allocationFailureEvent = (AllocationFailureEvent) jmsTemplate.receiveAndConvert(JMSConfig.ALLOCATION_FAILURE_QUEUE);
+        assertNotNull(allocationFailureEvent);
+        assertEquals(allocationFailureEvent.getOrderId(), savedSodaOrder.getId());
     }
 
     @Test
