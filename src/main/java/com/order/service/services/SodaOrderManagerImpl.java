@@ -82,6 +82,14 @@ public class SodaOrderManagerImpl implements SodaOrderManager {
     }
 
     @Override
+    public void cancelOrder(UUID id) {
+        Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(id);
+        sodaOrderOptional.ifPresentOrElse(sodaOrder -> {
+            sendSodaOrderEvent(sodaOrder, SodaOrderEventEnum.CANCEL_ORDER);
+        }, () -> log.error("Soda order not found: " + id));
+    }
+
+    @Override
     public void sodaOrderPendingInventory(SodaOrderDto sodaOrderDto) {
         Optional<SodaOrder> sodaOrderOptional = sodaOrderRepository.findById(sodaOrderDto.getId());
         sodaOrderOptional.ifPresentOrElse(sodaOrder -> {

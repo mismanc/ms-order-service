@@ -21,13 +21,18 @@ public class SodaOrderValidationListener {
     public void list(Message msg) {
         ValidateOrderRequest request = (ValidateOrderRequest) msg.getPayload();
         boolean valid = true;
+        boolean sendResponse = true;
         if (request.getSodaOrderDto().getCustomerRef() != null && request.getSodaOrderDto().getCustomerRef().equals("fail-validation")) {
             valid = false;
+        } else if (request.getSodaOrderDto().getCustomerRef() != null && request.getSodaOrderDto().getCustomerRef().equals("dont-validate")) {
+            sendResponse = false;
         }
         System.out.println("############ SodaOrderValidationListener ############");
-        jmsTemplate.convertAndSend(JMSConfig.VALIDATE_ORDER_RESPONSE_QUEUE, ValidateOrderResult.builder()
-                .isValid(valid).id(request.getSodaOrderDto().getId())
-                .build());
+        if (sendResponse) {
+            jmsTemplate.convertAndSend(JMSConfig.VALIDATE_ORDER_RESPONSE_QUEUE, ValidateOrderResult.builder()
+                    .isValid(valid).id(request.getSodaOrderDto().getId())
+                    .build());
+        }
     }
 
 }

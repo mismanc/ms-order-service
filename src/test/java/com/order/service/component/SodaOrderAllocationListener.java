@@ -22,6 +22,11 @@ public class SodaOrderAllocationListener {
         AllocateOrderRequest request = (AllocateOrderRequest) msg.getPayload();
         boolean pendingInventory;
         boolean allocationError = false;
+        boolean sendResponse = true;
+
+        if (request.getSodaOrderDto().getCustomerRef() != null && request.getSodaOrderDto().getCustomerRef().equals("dont-allocate")) {
+            sendResponse = false;
+        }
 
         if (request.getSodaOrderDto().getCustomerRef() != null && request.getSodaOrderDto().getCustomerRef().equals("partial-allocation")) {
             pendingInventory = true;
@@ -39,10 +44,12 @@ public class SodaOrderAllocationListener {
                 line.setQuantityAllocated(line.getOrderQuantity());
             }
         });
-        System.out.println("############ AllocationListener WORKED ############");
-        jmsTemplate.convertAndSend(JMSConfig.ALLOCATE_ORDER_RESPONSE_QUEUE, AllocateOrderResult.builder()
-                .sodaOrderDto(request.getSodaOrderDto()).pendingInventory(pendingInventory)
-                .allocationError(allocationError).build());
+        if (sendResponse) {
+            jmsTemplate.convertAndSend(JMSConfig.ALLOCATE_ORDER_RESPONSE_QUEUE, AllocateOrderResult.builder()
+                    .sodaOrderDto(request.getSodaOrderDto()).pendingInventory(pendingInventory)
+                    .allocationError(allocationError).build());
+        }
+
     }
 
 }

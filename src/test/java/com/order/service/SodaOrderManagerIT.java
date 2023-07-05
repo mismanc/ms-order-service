@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.ms.soda.events.AllocationFailureEvent;
+import com.ms.soda.events.DeallocateOrderRequest;
 import com.ms.soda.model.SodaDto;
 import com.order.service.config.JMSConfig;
 import com.order.service.domain.*;
@@ -193,6 +194,96 @@ public class SodaOrderManagerIT {
             SodaOrder afterOrder = sodaOrderGet.get();
             assertEquals(SodaOrderStatusEnum.PENDING_INVENTORY, afterOrder.getOrderStatus());
         });
+    }
+
+    @Test
+    void cancelValidationPending() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        sodaOrder.setCustomerRef("dont-validate");
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.VALIDATION_PENDING, afterOrder.getOrderStatus());
+        });
+
+        sodaOrderManager.cancelOrder(savedSodaOrder.getId());
+
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.CANCELLED, afterOrder.getOrderStatus());
+        });
+    }
+
+    @Test
+    void cancelAllocationPending() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        sodaOrder.setCustomerRef("dont-allocate");
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.ALLOCATION_PENDING, afterOrder.getOrderStatus());
+        });
+
+        sodaOrderManager.cancelOrder(savedSodaOrder.getId());
+
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.CANCELLED, afterOrder.getOrderStatus());
+        });
+    }
+
+    @Test
+    void cancelAllocated() throws JsonProcessingException {
+        SodaDto sodaDto = SodaDto.builder().id(sodaId).upc("123454").build();
+
+        wireMockServer.stubFor(WireMock.get(SodaServiceImpl.SODA_UPC_PATH_V1 + sodaDto.getUpc()).willReturn(
+                okJson(objectMapper.writeValueAsString(sodaDto))
+        ));
+
+        SodaOrder sodaOrder = createSodaOrder();
+        SodaOrder savedSodaOrder = sodaOrderManager.saveSodaOrder(sodaOrder);
+        sodaOrderManager.sendSodaOrderEvent(savedSodaOrder, SodaOrderEventEnum.VALIDATE_ORDER);
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.ALLOCATED, afterOrder.getOrderStatus());
+        });
+
+        sodaOrderManager.cancelOrder(savedSodaOrder.getId());
+
+        await().untilAsserted(()-> {
+            Optional<SodaOrder> sodaOrderGet = sodaOrderRepository.findById(savedSodaOrder.getId());
+            assertTrue(sodaOrderGet.isPresent());
+            SodaOrder afterOrder = sodaOrderGet.get();
+            assertEquals(SodaOrderStatusEnum.CANCELLED, afterOrder.getOrderStatus());
+        });
+
+        DeallocateOrderRequest deallocateOrderRequest = (DeallocateOrderRequest) jmsTemplate.receiveAndConvert(JMSConfig.DEALLOCATE_ORDER_QUEUE);
+        assertNotNull(deallocateOrderRequest);
+        assertEquals(deallocateOrderRequest.getSodaOrderDto().getId(), savedSodaOrder.getId());
     }
 
     private SodaOrder createSodaOrder() {

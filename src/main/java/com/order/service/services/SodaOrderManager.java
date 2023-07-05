@@ -23,4 +23,6 @@ public interface SodaOrderManager {
     void sendSodaOrderEvent(SodaOrder sodaOrder, SodaOrderEventEnum sodaOrderEventEnum);
 
     void pickUpOrder(UUID id);
+
+    void cancelOrder(UUID id);
 }
