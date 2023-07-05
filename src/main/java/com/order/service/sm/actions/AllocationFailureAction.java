@@ -4,9 +4,7 @@ import com.ms.soda.events.AllocationFailureEvent;
 import com.order.service.config.JMSConfig;
 import com.order.service.domain.SodaOrderEventEnum;
 import com.order.service.domain.SodaOrderStatusEnum;
-import com.order.service.repositories.SodaOrderRepository;
 import com.order.service.services.SodaOrderManagerImpl;
-import com.order.service.web.mappers.SodaOrderMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.core.JmsTemplate;
@@ -21,9 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AllocationFailureAction implements Action<SodaOrderStatusEnum, SodaOrderEventEnum> {
 
-    private final SodaOrderRepository sodaOrderRepository;
     private final JmsTemplate jmsTemplate;
-    private final SodaOrderMapper sodaOrderMapper;
 
     @Override
     public void execute(StateContext<SodaOrderStatusEnum, SodaOrderEventEnum> stateContext) {

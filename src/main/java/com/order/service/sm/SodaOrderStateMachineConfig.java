@@ -2,10 +2,7 @@ package com.order.service.sm;
 
 import com.order.service.domain.SodaOrderEventEnum;
 import com.order.service.domain.SodaOrderStatusEnum;
-import com.order.service.sm.actions.AllocateOrderAction;
-import com.order.service.sm.actions.AllocationFailureAction;
-import com.order.service.sm.actions.ValidateOrderAction;
-import com.order.service.sm.actions.ValidationFailureAction;
+import com.order.service.sm.actions.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
@@ -24,6 +21,7 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
     private final AllocateOrderAction allocateOrderAction;
     private final ValidationFailureAction validationFailureAction;
     private final AllocationFailureAction allocationFailureAction;
+    private final DeallocateOrderAction deallocateOrderAction;
 
     @Override
     public void configure(StateMachineStateConfigurer<SodaOrderStatusEnum, SodaOrderEventEnum> states) throws Exception {
@@ -33,6 +31,7 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
                 .end(SodaOrderStatusEnum.DELIVERED)
                 .end(SodaOrderStatusEnum.DELIVERY_EXCEPTION)
                 .end(SodaOrderStatusEnum.VALIDATION_EXCEPTION)
+                .end(SodaOrderStatusEnum.CANCELLED)
                 .end(SodaOrderStatusEnum.ALLOCATION_EXCEPTION);
     }
 
@@ -44,20 +43,32 @@ public class SodaOrderStateMachineConfig extends StateMachineConfigurerAdapter<S
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.VALIDATION_PENDING).target(SodaOrderStatusEnum.VALIDATED).event(SodaOrderEventEnum.VALIDATION_PASSED)
                 .and().withExternal()
+                .source(SodaOrderStatusEnum.VALIDATION_PENDING).target(SodaOrderStatusEnum.CANCELLED)
+                .event(SodaOrderEventEnum.CANCEL_ORDER)
+                .and().withExternal()
                 .source(SodaOrderStatusEnum.VALIDATION_PENDING).target(SodaOrderStatusEnum.VALIDATION_EXCEPTION).event(SodaOrderEventEnum.VALIDATION_FAILED)
                 .action(validationFailureAction)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.VALIDATED).target(SodaOrderStatusEnum.ALLOCATION_PENDING)
                 .event(SodaOrderEventEnum.ALLOCATE_ORDER).action(allocateOrderAction)
                 .and().withExternal()
+                .source(SodaOrderStatusEnum.VALIDATED).target(SodaOrderStatusEnum.CANCELLED)
+                .event(SodaOrderEventEnum.CANCEL_ORDER)
+                .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.ALLOCATED).event(SodaOrderEventEnum.ALLOCATION_SUCCESS)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.ALLOCATION_EXCEPTION)
                 .event(SodaOrderEventEnum.ALLOCATION_FAILED).action(allocationFailureAction)
                 .and().withExternal()
+                .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.CANCELLED)
+                .event(SodaOrderEventEnum.CANCEL_ORDER)
+                .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATION_PENDING).target(SodaOrderStatusEnum.PENDING_INVENTORY).event(SodaOrderEventEnum.ALLOCATION_NO_INVENTORY)
                 .and().withExternal()
                 .source(SodaOrderStatusEnum.ALLOCATED).target(SodaOrderStatusEnum.PICKED_UP).event(SodaOrderEventEnum.SODA_ORDER_PICKED_UP)
+                .and().withExternal()
+                .source(SodaOrderStatusEnum.ALLOCATED).target(SodaOrderStatusEnum.CANCELLED)
+                .event(SodaOrderEventEnum.CANCEL_ORDER).action(deallocateOrderAction)
         ;
     }
 }
