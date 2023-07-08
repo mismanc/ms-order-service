@@ -10,4 +10,6 @@ public interface CustomerRepository extends PagingAndSortingRepository<Customer,
 
     List<Customer> findAllByCustomerNameLike(String customerName);
 
+    long countByCustomerNameLike(String customerName);
+
 }

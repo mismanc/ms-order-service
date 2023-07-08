@@ -25,7 +25,7 @@ public class SodaOrderBootStrap implements CommandLineRunner {
     }
 
     private void loadCustomerData() {
-        if (customerRepository.count() == 0) {
+        if (customerRepository.countByCustomerNameLike(TASTING_ROOM) == 0) {
             Customer customer = customerRepository.save(Customer.builder()
                     .customerName(TASTING_ROOM)
                     .apiKey(UUID.randomUUID())
