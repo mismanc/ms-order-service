@@ -6,6 +6,7 @@ import com.order.service.bootstrap.SodaOrderBootStrap;
 import com.order.service.domain.Customer;
 import com.order.service.repositories.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public class TastingRoomService {
 
 
     @Transactional
-    // @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 4000)
     public void placeTastingRoomOrder(){
         List<Customer> customerList = customerRepository.findAllByCustomerNameLike(SodaOrderBootStrap.TASTING_ROOM);
         if (customerList.size() == 1){ //should be just one
