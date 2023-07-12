@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: order-service
   artemis:
     password: simetraehcapa
     user: artemis
