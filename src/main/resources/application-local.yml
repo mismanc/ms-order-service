@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    discovery:
+      enabled: true
+  config:
+    import: configserver:http://localhost:8888
